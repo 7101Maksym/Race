@@ -155,7 +155,7 @@ namespace Race
             }
 		}
 
-		static void PrintFied(char[,] field)
+		static void PrintField(char[,] field)
 		{
 			int id = 1;
 
@@ -287,7 +287,7 @@ namespace Race
 
 				Console.Clear();
 
-				PrintFied(field);
+				PrintField(field);
 				PrintSnailInformation(ref snails);
 			} while (!is_win2 && a.Key == ConsoleKey.Enter);
         }
@@ -327,7 +327,7 @@ namespace Race
 
 			InitSnails(ref Snails, param.Item2);
 
-			PrintFied(field);
+			PrintField(field);
 
 			process(ref Snails, ref field, param.Item1);
 
