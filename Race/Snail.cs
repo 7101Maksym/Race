@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,28 +8,52 @@ namespace Race
 {
 	public class Snail
 	{
-		public int _id = -1;
+		private int _id;
 
-		public char _sumbol = ' ';
-
-		public int _speed;
-		public int _position = 0;
+		private int speed;
+		private int position = 0;
 
 		public int pos
 		{
 			get
 			{
-				return _position;
+				return position;
 			}
 			set
 			{
-				_position += value;
+				position = value;
 			}
 		}
 
-		public Snail(int speed)
+		public int id
 		{
-			this._speed = speed;
+			get
+			{
+				return _id;
+			}
+			init
+			{
+				_id = value;
+			}
+		}
+
+		public int get_speed
+		{
+			get
+			{
+				return speed;
+			}
+		}
+
+		public Snail(int speed, int id)
+		{
+			this.speed = speed;
+			_id = id;
+		}
+
+		public void DoStep()
+		{
+			position += speed;
 		}
 	}
 }
