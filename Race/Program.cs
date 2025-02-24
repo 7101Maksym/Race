@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
 namespace Race
 {
@@ -142,203 +142,117 @@ namespace Race
 			return parametrs;
 		}
 
-		static void PrintSnailInformation(ref List<Snail> snails)
+		static void PrintSnailsInformation(int[] steps)
 		{
-			Console.WriteLine();
-
-            for (int i = 0; i < snails.Count; i++)
+			for (int i = 0; i < steps.Length; i++)
 			{
 				SetColorByNumber(0, i + 1);
-				Console.Write("@ ");
+				Console.Write("@");
                 SetColorByNumber(0, 15);
-				Console.WriteLine($"прошла {snails[i].pos} шагов");
+
+				Console.WriteLine($" прошла {steps[i]} шагов.");
             }
 		}
 
-		static void PrintField(char[,] field)
+		static void PrintField(int length, int[] positions, int count_snails)
 		{
-			int id = 1;
+			bool wall_or_road = true;
 
-			for (int i = 0; i < field.GetLength(0); i++)
-			{
-				for (int j = 0;  j < field.GetLength(1); j++)
-				{
-					if (field[i, j] == '@')
-					{
-						SetColorByNumber(0, id);
-
-						id++;
-
-						Console.Write(field[i, j]);
-					}
-					else
-					{
-						SetColorByNumber(0, 15);
-
-						Console.Write(field[i, j]);
-					}
-                }
-
-				Console.WriteLine();
-			}
-		}
-
-		static char[,] InitField(int rows, int cols)
-		{
-			char[,] field = new char[rows + rows + 1, cols + 2];
-
-			for (int i = 0; i < field.GetLength(0); i++)
-			{
-				for (int j = 0; j < field.GetLength(1); j++)
-				{
-					if (j == 0 || j == field.GetLength(1) - 1)
-					{
-						field[i, j] = '|';
-					}
-					else if (j == 1 && i % 2 != 0)
-					{
-                        field[i, j] = '@';
-                    }
-                    else if ((j == 2 || j == field.GetLength(1) - 2) && i % 2 != 0)
-                    {
-                        field[i, j] = '#';
-                    }
-                    else if (i % 2 == 0)
-					{
-						field[i, j] = '-';
-					}
-					else
-					{
-						field[i, j] = ' ';
-					}
-				}
-			}
-
-			return field;
-		}
-
-		static void InitSnails(ref List<Snail> snails, int count)
-		{
-			for (int i = 0; i < count; i++)
-			{
-				Snail item = new Snail((Random.Shared.Next() % 6) + 1);
-
-				snails.Add(item);
-            }
-		}
-
-		static void process(ref List<Snail> snails, ref char[,] field, int length)
-		{
-			ConsoleKeyInfo a;
-
-			bool is_win = false, is_win2 = false;
+			int n = 0;
 
 			do
 			{
-				Console.WriteLine("Нажмите Enter, чтобы продолжить, или другую клавишу, чтобы завершить игру");
+				SetColorByNumber(0, 15);
 
-                a = Console.ReadKey();
+				Console.Write("|");
 
-				if (a.Key == ConsoleKey.Enter)
+				if (wall_or_road)
 				{
-					for (int i = 1, j = 0; j < snails.Count; i += 2, j++)
+					for (int i = 0; i <= length; i++)
 					{
-						if ((snails[j].pos + 1 + snails[j]._speed) >= length)
-						{
-							is_win = true;
-							is_win2 = true;
-						}
-						else
-						{
-							is_win = false;
-						}
-
-						if (!is_win)
-						{
-							field[i, snails[j].pos + 1] = snails[j]._sumbol;
-
-							snails[j]._sumbol = field[i, snails[j].pos + 1 + snails[j]._speed];
-
-							snails[j].pos = snails[j]._speed;
-
-							field[i, snails[j].pos + 1] = '@';
-						}
-						else
-						{
-							field[i, snails[j].pos + 1] = snails[j]._sumbol;
-
-                            snails[j]._position = length;
-
-                            field[i, field.GetLength(1) - 2] = '@';
-
-							snails[j]._id = j + 1;
-						}
-					}
-				}
+                        Console.Write("-");
+                    }
+                }
 				else
 				{
-					Console.Clear();
-					Console.WriteLine("Игра остановлена");
+                    for (int i = 0; i <= length; i++)
+                    {
+						if (i == positions[n] && positions[n] != 50)
+						{
+							SetColorByNumber(0, n + 1);
+							Console.Write("@");
+                            SetColorByNumber(0, 15);
+                        }
+						else
+						{
+							Console.Write(" ");
+						}
+                    }
 
-					stop = true;
+					n++;
+                }
+				
+				Console.WriteLine("|");
 
-					return;
+				wall_or_road = !wall_or_road;
+			}while (n != count_snails);
+
+            Console.Write("|");
+
+            for (int i = 0; i <= length; i++)
+            {
+                Console.Write("-");
+            }
+
+            Console.WriteLine("|");
+        }
+
+		static void Process((int, int) param)
+		{
+			int[] winners;
+
+			Snails_parametrs s = new Snails_parametrs(param.Item2, param.Item1);
+
+			do
+			{
+				PrintField(param.Item1, s.GetSnailsPositions(), s.count_snails);
+
+				winners = s.GetWinners();
+				
+				PrintSnailsInformation(s.GetSnailsPositions());
+				
+				if (winners.Length != 0)
+				{
+					break;
 				}
+
+				Console.ReadKey();
 
 				Console.Clear();
 
-				PrintField(field);
-				PrintSnailInformation(ref snails);
-			} while (!is_win2 && a.Key == ConsoleKey.Enter);
-        }
+				s.MoveSnails();
+			}while(true);
 
-		static void PrintWinner(List<Snail> snails)
-		{
-			Console.Clear();
+			Console.Write("\n\nВыиграли: ");
 
-			Console.Write("Победители:");
-
-			for (int i = 0; i < snails.Count; i++)
+			for (int i = 0; i < winners.Length; i++)
 			{
-				if (snails[i]._id != -1)
-				{
-					SetColorByNumber(0, snails[i]._id);
-					Console.Write($" @");
-                    SetColorByNumber(0, 15);
-                }
-			}
+				SetColorByNumber(0, winners[i]);
+				Console.Write("@");
+                SetColorByNumber(0, 15);
+				Console.Write(" ");
+            }
 
-			Console.WriteLine();
+			Console.WriteLine("\n");
 		}
-
-		
 
 		static void Main(string[] args)
 		{
-			char[,] field;
-
 			(int, int) param;
 
 			param = GetFieldLengthAndSnailCount();
 
-			List<Snail> Snails = new List<Snail>(param.Item2);
-
-			field = InitField(param.Item2, param.Item1);
-
-			InitSnails(ref Snails, param.Item2);
-
-			PrintField(field);
-
-			process(ref Snails, ref field, param.Item1);
-
-			if (!stop)
-			{
-				Console.WriteLine("Нажмите любую клавишу");
-
-				Console.ReadKey();
-
-				PrintWinner(Snails);
-			}
+			Process(param);
 		}
 	}
 }
